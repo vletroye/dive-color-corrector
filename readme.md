@@ -8,7 +8,6 @@
 
 [![Video](https://img.youtube.com/vi/NEpl41-LMBs/0.jpg)](https://www.youtube.com/watch?v=NEpl41-LMBs)
 
-
 ### Setup
 ```
 $ pip install -r requirements.txt
