@@ -6,7 +6,7 @@
 
 **Sample video**
 
-[![Video](https://youtu.be/XuDRmIuE3F4/0.jpg)](https://youtu.be/XuDRmIuE3F4)
+[![Video](https://img.youtube.com/vi/XuDRmIuE3F4/0.jpg)](https://youtu.be/XuDRmIuE3F4)
 
 ### Setup
 ```
