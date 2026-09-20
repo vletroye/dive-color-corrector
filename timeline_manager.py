@@ -70,20 +70,44 @@ def update_marker_buttons(window, selected_idx):
     for k in ["__MARKER_FAST_REW__", "__MARKER_REW__", "__MARKER_FWD__", "__MARKER_FAST_FWD__"]:
         window[k].update(disabled=False)
 
+def _init_graph_state(graph):
+    if not hasattr(graph, '_tl_ids'):
+        graph._tl_ids = {'bg': None, 'markers': [], 'playhead': None}
+
+def reset_timeline(window):
+    """Efface complètement le graph et réinitialise les IDs stockés."""
+    graph = window["__TIMELINE__"]
+    graph.erase()
+    graph._tl_ids = {'bg': None, 'markers': [], 'playhead': None}
+    graph._tl_sel_ids = []
+
+def _draw_marker_figures(graph, m, is_start, color, line_w, marker_w):
+    ids = []
+    ids.append(graph.draw_line((m, 5), (m, 25), color=color, width=line_w))
+    if is_start:
+        ids.append(graph.draw_line((m, 5), (m + marker_w, 5), color=color, width=line_w))
+        ids.append(graph.draw_line((m, 25), (m + marker_w, 25), color=color, width=line_w))
+    else:
+        ids.append(graph.draw_line((m, 5), (m - marker_w, 5), color=color, width=line_w))
+        ids.append(graph.draw_line((m, 25), (m - marker_w, 25), color=color, width=line_w))
+    return ids
+
 def draw_timeline(window, markers, selected_idx, current_frame, frame_count, only_playhead=False):
     """Dessine la barre de navigation timeline, les marqueurs et le curseur de lecture (playhead)."""
     graph = window["__TIMELINE__"]
-
-    if not only_playhead:
-        graph.erase()
-    else:
-        if hasattr(graph, '_playhead_id') and graph._playhead_id:
-            graph.delete_figure(graph._playhead_id)
+    _init_graph_state(graph)
+    ids = graph._tl_ids
 
     if frame_count <= 0:
         return
 
+    marker_w = max(1, frame_count * 0.010)
+
+    if not hasattr(graph, '_tl_sel_ids'):
+        graph._tl_sel_ids = []
+
     if not only_playhead:
+        # Full redraw: update coordinates then replace every figure in place
         window.TKroot.update_idletasks()
         actual_width = graph.Widget.winfo_width()
         if actual_width > 10:
@@ -93,26 +117,39 @@ def draw_timeline(window, markers, selected_idx, current_frame, frame_count, onl
         margin = max(1, int(frame_count * (15 / graph_width) / 2))
         graph.change_coordinates((1 - margin, 0), (frame_count + margin, 30))
 
-        graph.draw_line((1, 15), (frame_count, 15), color='#444444', width=4)
+        # Background bar
+        if ids['bg']:
+            graph.delete_figure(ids['bg'])
+        ids['bg'] = graph.draw_line((1, 15), (frame_count, 15), color='#444444', width=4)
 
-        marker_w = max(1, frame_count * 0.010)
+        # All unselected markers
+        for fid in ids['markers']:
+            graph.delete_figure(fid)
+        ids['markers'] = []
+
+        # Selected marker
+        for fid in graph._tl_sel_ids:
+            graph.delete_figure(fid)
+        graph._tl_sel_ids = []
 
         for i, m in enumerate(markers):
             color = '#4CAF50' if i % 2 == 0 else '#F44336'
             is_selected = (i == selected_idx)
-            outline = 'white' if is_selected else color
-            line_w = 2 if is_selected else 1
-
-            if i % 2 == 0:
-                # Marqueur de début '['
-                graph.draw_line((m, 5), (m, 25), color=outline, width=line_w)
-                graph.draw_line((m, 5), (m + marker_w, 5), color=outline, width=line_w)
-                graph.draw_line((m, 25), (m + marker_w, 25), color=outline, width=line_w)
+            if is_selected:
+                graph._tl_sel_ids = _draw_marker_figures(graph, m, i % 2 == 0, 'white', 2, marker_w)
             else:
-                # Marqueur de fin ']'
-                graph.draw_line((m, 5), (m, 25), color=outline, width=line_w)
-                graph.draw_line((m, 5), (m - marker_w, 5), color=outline, width=line_w)
-                graph.draw_line((m, 25), (m - marker_w, 25), color=outline, width=line_w)
+                ids['markers'].extend(_draw_marker_figures(graph, m, i % 2 == 0, color, 1, marker_w))
 
+    else:
+        # Lightweight update: only move the selected marker and the playhead
+        if selected_idx is not None and selected_idx < len(markers):
+            for fid in graph._tl_sel_ids:
+                graph.delete_figure(fid)
+            m = markers[selected_idx]
+            graph._tl_sel_ids = _draw_marker_figures(graph, m, selected_idx % 2 == 0, 'white', 2, marker_w)
+
+    # Playhead
+    if ids['playhead']:
+        graph.delete_figure(ids['playhead'])
     draw_frame = min(current_frame, frame_count)
-    graph._playhead_id = graph.draw_line((draw_frame, 0), (draw_frame, 30), color='white', width=1)
+    ids['playhead'] = graph.draw_line((draw_frame, 0), (draw_frame, 30), color='white', width=1)
