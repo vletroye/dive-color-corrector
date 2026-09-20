@@ -1,0 +1,1 @@
+python -m PyInstaller -n "Dive Color Corrector" -F -w -i .\logo\logo.ico dcc.py
