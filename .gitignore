@@ -120,3 +120,6 @@ static/uploads/*
 .venv/*
 
 outputs/*
+
+LUTS/*
+list.cfg
