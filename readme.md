@@ -6,7 +6,7 @@
 
 **Sample video**
 
-[![Video](https://img.youtube.com/vi/NEpl41-LMBs/0.jpg)](https://www.youtube.com/watch?v=NEpl41-LMBs)
+[![Video](https://youtu.be/XuDRmIuE3F4/0.jpg)](https://youtu.be/XuDRmIuE3F4)
 
 ### Setup
 ```
