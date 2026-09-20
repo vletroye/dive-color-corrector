@@ -14,9 +14,9 @@ $ pip install -r requirements.txt
 ```
 
 ## GUI
-You can either download the [desktop softwares](https://github.com/vletroye/dive-color-corrector) or build one yourself.
-
 ![GUI](./examples/gui.jpg)
+
+You can download the [desktop softwares](https://github.com/vletroye/dive-color-corrector/releases/) or build it yourself.
 
 ### Building the GUI
 Uncomment the libraries needed for GUI in `requirements.txt` and re-run `pip install`.
